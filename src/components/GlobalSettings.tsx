@@ -118,8 +118,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     },
 
     update: (thePoint: SurveyPoint, updatedData: object) => {
-      const newPoints = settings.surveyPoints.map((point) =>
-        point.id === thePoint.id ? { ...point, ...updatedData } : point,
+      const newPoints = settings.surveyPoints.map((point) => point.id === thePoint.id ? { ...point, ...updatedData } : point
       );
       updateSettings({ surveyPoints: newPoints });
     },
@@ -127,8 +126,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     delete: (points: SurveyPoint[]) => {
       const pointsToRemove = new Set(points.map((point) => point.id));
       const newPoints = settings.surveyPoints.filter(
-        (point) => !pointsToRemove.has(point.id),
+        (point) => !pointsToRemove.has(point.id)
       );
+      updateSettings({ surveyPoints: newPoints });
+    },
+    create: (newPoint: SurveyPoint) => {
+      const newPoints = [...settings.surveyPoints, newPoint];
       updateSettings({ surveyPoints: newPoints });
     },
   };

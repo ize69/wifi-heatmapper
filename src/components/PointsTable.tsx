@@ -293,8 +293,153 @@ const SurveyPointsTable: React.FC<SurveyPointsTableProps> = ({
     });
   }, [rowSelection, flattenedData, myUpdate]);
 
+  //function to export the data in the table as a csv
+  const exportCsv = useCallback(() => {
+    // rows to export: selected > filtered
+    const rows =
+      table.getSelectedRowModel().rows.length > 0
+        ? table.getSelectedRowModel().rows
+        : table.getFilteredRowModel().rows;
+  
+    if (rows.length === 0) return;
+  
+    // visible columns (exclude selection + internal fields)
+    const columns = table
+      .getAllLeafColumns()
+      .filter((col) => col.id !== "select" && col.id !== "origPoint");
+  
+    const headers = columns.map((col) => col.id);
+  
+    const csv = [
+      headers.join(","), // header row
+      ...rows.map((row) =>
+        headers
+          .map((key) => {
+            const value = row.getValue(key);
+            if (value == null) return "NA";
+            return `"${String(value).replace(/"/g, '""')}"`;
+          })
+          .join(","),
+      ),
+    ].join("\n");
+  
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+  
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "survey-points.csv";
+    link.click();
+  
+    URL.revokeObjectURL(url);
+  }, [table]);
+  
+  //
+  //import csv file and ask if will be added to curent points or replace them
+  const [pendingImport, setPendingImport] = useState<SurveyPoint[] | null>(null);
+
+const parseCsv = async (file: File, existingPoints: SurveyPoint[]): Promise<SurveyPoint[]> => {
+  const text = await file.text();
+  const [headerLine, ...lines] = text.split(/\r?\n/).filter(Boolean);
+
+  const headers = headerLine.split(",").map((h) => h.trim());
+
+  const parsedPoints: SurveyPoint[] = lines.map((line) => {
+    const values = line
+      .match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)!
+      .map((v) => v.replace(/^"|"$/g, ""));
+
+    const row: any = Object.fromEntries(
+      headers.map((h, i) => [h, values[i]]),
+    );
+
+    return {
+      id: row.id,
+      x: Number(row.x),
+      y: Number(row.y),
+      timestamp: new Date(row.timestamp ?? Date.now()).toISOString(),
+      isEnabled: row.isEnabled === "true",
+      wifiData: {
+        ssid: row.ssid,
+        bssid: row.bssid,
+        rssi: Number(row.rssi),
+        signalStrength: Number(row.signalQuality),
+        channel: Number(row.channel),
+        security: row.security,
+        txRate: Number(row.txRate),
+        phyMode: row.phyMode,
+        channelWidth: Number(row.channelWidth),
+        band: row.band,
+      },
+      iperfData: {
+        tcpDownload: { bitsPerSecond: Number(row.tcpDownloadMbps) * 1e6 },
+        tcpUpload: { bitsPerSecond: Number(row.tcpUploadMbps) * 1e6 },
+        udpDownload: { bitsPerSecond: Number(row.udpDownloadMbps) * 1e6 },
+        udpUpload: { bitsPerSecond: Number(row.udpUploadMbps) * 1e6 },
+      },
+    } as unknown as SurveyPoint;
+  });
+
+  // Filter out points with duplicate IDs
+  const uniquePoints = parsedPoints.filter(
+    (p) => !existingPoints.some((existing) => existing.id === p.id)
+  );
+
+  return uniquePoints;
+};
+
+  
+  
+  
+  
+
   return (
     <div className="space-y-4">
+      
+      {pendingImport && (
+        //handles the importing csv ui eliments 
+    <AlertDialogModal
+      title="Import Survey Points"
+      description={`You are importing ${pendingImport.length} points. What would you like to do?`}
+      onConfirm={() => {
+        // default confirm = ADD
+        pendingImport.forEach((p) => surveyPointActions.create(p));
+        setPendingImport(null);
+      }}
+      onCancel={() => setPendingImport(null)}
+    >
+      <div className="flex justify-end gap-2">
+      <Button
+        variant="destructive"
+        onClick={() => {
+          if (!data || data.length === 0) return;
+
+          // 1. Delete all existing points
+          surveyPointActions.delete(data);
+
+          // 2. Add the imported points
+          pendingImport?.forEach((point) => surveyPointActions.add(point));
+
+          // 3. Clear pending import
+          setPendingImport(null);
+        }}
+        >
+          Replace Existing
+        </Button>
+
+          
+        <Button
+          onClick={() => {
+            // ADD
+            pendingImport.forEach((p) => surveyPointActions.add(p));
+            setPendingImport(null);
+          }}
+        >
+          Add to Existing
+        </Button>
+      </div>
+    </AlertDialogModal>
+  )}
       <div className="text-2xl font-bold mt-4">Survey Points</div>
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -374,6 +519,39 @@ const SurveyPointsTable: React.FC<SurveyPointsTableProps> = ({
           >
             Toggle Disable Selected
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            disabled={
+            table.getFilteredRowModel().rows.length === 0
+            }
+          >
+            Export CSV
+          </Button>
+          <>
+          <input
+            type="file"
+            accept=".csv"
+            hidden
+            id="csv-import"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const points = await parseCsv(file,data);
+              setPendingImport(points);
+              e.target.value = "";
+            }}
+          />
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => document.getElementById("csv-import")?.click()}
+          >
+            Import CSV
+          </Button>
+          </>
         </div>
       </div>
       <div className="rounded-md border">
