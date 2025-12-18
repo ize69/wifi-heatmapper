@@ -1,4 +1,16 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/utils/webGLUtils.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // -- BUFFER SETUP --
+/**
+ * const createFullScreenQuad = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const createFullScreenQuad = (
   gl: WebGLRenderingContext,
 ): WebGLBuffer => {
@@ -14,6 +26,11 @@ export const createFullScreenQuad = (
 
 // -- UNIFORM LOOKUPS --
 
+/**
+ * const getUniformLocations = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const getUniformLocations = (
   gl: WebGLRenderingContext,
   program: WebGLProgram,
@@ -29,6 +46,11 @@ export const getUniformLocations = (
   u_lut: gl.getUniformLocation(program, "u_lut"),
 });
 
+/**
+ * const getAttribLocations = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const getAttribLocations = (
   gl: WebGLRenderingContext,
   program: WebGLProgram,
@@ -36,6 +58,11 @@ export const getAttribLocations = (
   a_position: gl.getAttribLocation(program, "a_position"),
 });
 
+/**
+ * const compileShader = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const compileShader = (
   gl: WebGLRenderingContext,
   type: number,
@@ -50,6 +77,11 @@ export const compileShader = (
   return shader;
 };
 
+/**
+ * const createShaderProgram = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const createShaderProgram = (
   gl: WebGLRenderingContext,
   vertexSrc: string,
@@ -72,6 +104,11 @@ export const createShaderProgram = (
 };
 
 // -- SHADER SETUP --
+/**
+ * const createWebGLContext = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const createWebGLContext = (
   canvas: HTMLCanvasElement,
 ): WebGLRenderingContext => {

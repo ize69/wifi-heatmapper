@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/HeatmapModal.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { useCallback } from "react";
 import {
   Dialog,
@@ -15,6 +22,11 @@ type HeatmapModalProps = {
   onClose: () => void;
 };
 
+/**
+ * function HeatmapModal — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function HeatmapModal({ src, alt, open, onClose }: HeatmapModalProps) {
   const handleDownload = useCallback(() => {
     const filename = `${alt.replace(/\s+/g, "_")}.png`;

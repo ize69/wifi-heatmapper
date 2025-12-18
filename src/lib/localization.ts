@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/localization.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use server";
 
 import { readdirSync, readFileSync } from "fs";
@@ -12,6 +19,11 @@ import { LocalizerMap } from "./types";
  * @returns localizer object
  */
 
+/**
+ * async function initLocalization — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function initLocalization(): Promise<LocalizerMap> {
   const localizationDir = join("data", "localization");
   // console.log(`__dirname: ${__dirname}`);

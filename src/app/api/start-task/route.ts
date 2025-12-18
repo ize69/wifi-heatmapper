@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/api/start-task/route.ts
+ * Purpose: API endpoint to start/stop a measurement and to return pollable results.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * start-task API - /api/start-task?action=...
  * - GET  of "action=status" returns the current status
@@ -16,6 +23,11 @@ import { getLogger } from "../../../lib/logger";
 const logger = getLogger("start-task");
 
 // handle a "status" request
+/**
+ * async function GET — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
@@ -31,7 +43,19 @@ export async function GET(req: NextRequest) {
   );
 }
 
+/**
+ * async function POST — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function POST(req: NextRequest) {
+  /**
+   * POST /api/start-task?action=start|stop
+   * - action=start: accepts `{ settings }` JSON and starts an asynchronous
+   *   background measurement. The server immediately returns "OK" and the
+   *   running process updates results via `setSurveyResults` and SSE.
+   * - action=stop: sets the global cancel flag so a running measurement will stop.
+   */
   // Get the `action` parameter - /api/start-task?action=start`
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
@@ -55,13 +79,14 @@ export async function POST(req: NextRequest) {
           });
           return;
         }
-        if (!wifiData || !iperfData) {
+        if (!wifiData) {
           setSurveyResults({
             state: "error",
-            explanation: "wifi or iperf data is null",
+            explanation: "wifi data is null",
           });
           return;
         }
+        // if iperfData is null, still return wifiData so the point can be plotted
         setSurveyResults({ state: "done", results: { wifiData, iperfData } });
       } catch (err) {
         setSurveyResults({ state: "error", explanation: String(err) });

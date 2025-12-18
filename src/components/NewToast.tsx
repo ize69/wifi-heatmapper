@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/NewToast.tsx
+ * Purpose: SSE-driven status toast used during measurements (shows progress/errors).
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 import { useState, useEffect } from "react";
 import * as Toast from "@radix-ui/react-toast";
@@ -6,7 +13,18 @@ interface NewToastProps {
   onClose: () => void;
   toastIsReady: () => void;
 }
+/**
+ * default function NewToast — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export default function NewToast({ onClose, toastIsReady }: NewToastProps) {
+  /**
+   * NewToast - client-side SSE listener
+   * Connects to `/api/events` and updates the toast with `update` and `done`
+   * messages sent by server-side code. Calls `toastIsReady()` when SSE 'ready'
+   * is received so the measurement can start.
+   */
   const [toastHeader, setToastHeader] = useState("");
   const [toastStatus, setToastStatus] = useState("");
   const [taskRunning, setTaskRunning] = useState(true);

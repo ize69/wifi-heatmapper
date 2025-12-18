@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ui/alert.tsx
+ * Small UI component used by the app.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 

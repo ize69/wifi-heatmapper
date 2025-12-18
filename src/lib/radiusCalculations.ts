@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/radiusCalculations.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * radius.ts - various algorithms for calculating the radius funcion
  * for a heatmap.
@@ -40,6 +47,11 @@ export function calculateRadiusByDensity(points: SurveyPoint[]): number {
 /**
  * Calculate radius based on bounding box and data point count
  * This is the function currently used in the app
+ */
+/**
+ * function calculateRadiusByBoundingBox — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function calculateRadiusByBoundingBox(points: SurveyPoint[]): number {
   if (points.length === 0) return 30;

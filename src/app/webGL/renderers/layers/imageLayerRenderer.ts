@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/renderers/layers/imageLayerRenderer.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { drawTextureFullScreen } from "@/app/webGL/renderers/helpers/drawFullScreenTexture";
 import { setDefaultTextureParams } from "../../utils/webGLDefaults";
 
@@ -32,6 +39,11 @@ const createTextureFromImageSrc = async (
   return createTextureFromImage(gl, image);
 };
 
+/**
+ * const createBackgroundLayerRenderer = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const createBackgroundLayerRenderer = (gl: WebGLRenderingContext) => {
   let cachedTexture: WebGLTexture | null = null;
   let cachedSrc: string | null = null;

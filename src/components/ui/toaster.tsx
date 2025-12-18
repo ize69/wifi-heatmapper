@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ui/toaster.tsx
+ * Small UI component used by the app.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 
 import {
@@ -10,6 +17,11 @@ import {
 } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 
+/**
+ * function Toaster — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function Toaster() {
   const { toasts } = useToast();
 

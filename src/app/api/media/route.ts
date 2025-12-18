@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/api/media/route.ts
+ * Server API route.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // app/api/media/route.ts
 /**
  * /media API
@@ -10,12 +17,22 @@ import path from "path";
 // import { IncomingForm } from 'formidable';
 
 // Ensure body parsing is disabled so we can handle file uploads
+/**
+ * const config = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
+/**
+ * async function GET — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function GET() {
   try {
     const mediaDir = path.join(process.cwd(), "public", "media");
@@ -29,6 +46,11 @@ export async function GET() {
   }
 }
 
+/**
+ * async function POST — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function POST(req: Request) {
   const formData = await req.formData();
   const file = formData.get("file") as File;

@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/HeatmapImage.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { Download } from "lucide-react";
 import downloadImage from "@/lib/downloadImage";
 import { useState } from "react";

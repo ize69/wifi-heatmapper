@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/wifiScanner-windows.ts
+ * Purpose: Windows-specific implementation of Wi‑Fi scanning and iperf checks.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import {
   PartialHeatmapSettings,
   WifiResults,
@@ -18,6 +25,11 @@ import { initLocalization } from "./localization";
 // const logger = getLogger("wifi-Windows");
 
 const localizer = await initLocalization();
+/**
+ * class WindowsWifiActions implements WifiActions — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export class WindowsWifiActions implements WifiActions {
   nameOfWifi: string = ""; // OS-specific name of the current wifi interface
   currentSSIDName: string = ""; // name of the current SSID
@@ -225,6 +237,11 @@ function assignWindowsNetworkInfoValue<K extends keyof WifiResults>(
  * @param string Output of the command
  * @returns array of WifiResults, sorted by signalStrength
  */
+/**
+ * function parseNetshNetworks — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function parseNetshNetworks(text: string): WifiResults[] {
   const results: WifiResults[] = [];
 
@@ -303,6 +320,11 @@ export function parseNetshNetworks(text: string): WifiResults[] {
  * @param line - a "label" separated by a ":" followed by a value
  * @returns array of strings: [label, key, value] may be ["", "",""] if no ":"
  */
+/**
+ * function splitLine — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function splitLine(line: string): string[] {
   const pos = line.indexOf(":");
   if (pos == -1) return ["", "", ""]; // no ":"? return empty values
@@ -323,6 +345,11 @@ export function splitLine(line: string): string[] {
  *
  * This code looks up the labels from the netsh... command
  * in a localization map that determines the proper label for the WifiNetwork
+ */
+/**
+ * function parseNetshInterfaces — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function parseNetshInterfaces(output: string): WifiResults {
   const networkInfo = getDefaultWifiResults();
@@ -378,6 +405,11 @@ async function getProfiles(): Promise<string[]> {
  * @param stdout - output of the `netsh ...` command
  * @returns array of profile names (strings) detected in the output
  */
+/**
+ * function parseProfiles — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function parseProfiles(stdout: string): string[] {
   const response = [];
   // break into lines, removing those without ":"
@@ -424,6 +456,11 @@ async function getProfileFromSSID(
  * @param stdout - the output of the `netsh...` command (above)
  * @param theSSID - the SSID we're looking for
  * @returns - the profile (if SSID matches) or null
+ */
+/**
+ * function findProfileFromSSID — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function findProfileFromSSID(
   stdout: string,

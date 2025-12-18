@@ -21,6 +21,11 @@
 
 import { HeatmapSettings } from "./types";
 
+/**
+ * async function readSettingsFromFile — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function readSettingsFromFile(
   fileName: string,
 ): Promise<HeatmapSettings | null> {
@@ -63,6 +68,11 @@ export async function readSettingsFromFile(
   }
 }
 
+/**
+ * async function writeSettingsToFile — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function writeSettingsToFile(
   settings: HeatmapSettings,
 ): Promise<void> {

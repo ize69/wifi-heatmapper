@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/server-init.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // lib/initServer.ts
 import { copyToMediaFolder } from "../lib/actions";
 import { getLogger } from "./logger";
@@ -54,6 +61,11 @@ async function logSystemInfo(): Promise<void> {
  * initServer() - a grab-bag of stuff to initialize on the server
  * - Logging system information
  * - Copying the default background image to /media/ folder
+ */
+/**
+ * async function initServer — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export async function initServer() {
   // one-time setup (e.g., DB pool, metrics, cache)
@@ -112,6 +124,11 @@ const NAME_FOR_10: Record<number, string> = {
   16: "Big Sur", // some early 11.0 reported as 10.16
 };
 
+/**
+ * function getMacOSNameAndVersion — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function getMacOSNameAndVersion(): string | null {
   if (process.platform !== "darwin") return null;
 

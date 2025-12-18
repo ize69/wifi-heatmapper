@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/Heatmaps.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useSettings } from "@/components/GlobalSettings";
@@ -63,11 +70,31 @@ const getAvailableProperties = (
  * that are selected in the checkboxes
  * @returns the rendered heat maps
  */
-export function Heatmaps() {
+/**
+ * function Heatmaps — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
+export function Heatmaps({ mode = "2d" }: { mode?: "2d" | "3d" } = { mode: "2d" }) {
   const { settings, updateSettings } = useSettings();
+  // Determine active floor plan (backwards compatible)
+  const floors = (settings.floorplans && settings.floorplans.length > 0)
+    ? settings.floorplans.slice().sort((a,b) => (a.z||0)-(b.z||0))
+    : [{ name: settings.floorplanImageName, path: settings.floorplanImagePath, z: 0 }];
+  const activeZ = settings.currentFloorZ ?? 0;
+  const activeFloor = floors.find((f) => (f.z ?? 0) === activeZ) || floors[0];
+  //check what the floor plan image is
+  const isEmptyFloorplan = activeFloor?.path?.endsWith("EmptyFloorPlan.png");
 
-  // array of surveyPoints passed in props
-  const points = settings.surveyPoints;
+  // array of surveyPoints for the active floor only
+  const points = settings.surveyPoints.filter((p) => (p.floorZ ?? 0) === (activeFloor?.z ?? 0));
+  // mapping of points per floor (used for 3D mode)
+  const pointsByFloor = (mode === "3d")
+    ? (settings.floorplans || [{ name: settings.floorplanImageName, path: settings.floorplanImagePath, z: 0 }])
+        .slice()
+        .sort((a,b) => (a.z||0)-(b.z||0))
+        .map((f) => ({ z: f.z ?? 0, points: settings.surveyPoints.filter((p) => (p.floorZ ?? 0) === (f.z ?? 0)), floor: f }))
+    : [];
 
   const [heatmaps, setHeatmaps] = useState<{ [key: string]: string | null }>(
     {},
@@ -147,8 +174,13 @@ export function Heatmaps() {
    * @returns array of {x, y, value}
    */
   const generateHeatmapData = useCallback(
-    (metric: MeasurementTestType, testType?: keyof IperfTestProperty) => {
-      const data = points
+    (
+      metric: MeasurementTestType,
+      testType?: keyof IperfTestProperty,
+      srcPoints?: SurveyPoint[],
+    ) => {
+      const usePoints = srcPoints ?? points;
+      const data = usePoints
         .filter((p) => p.isEnabled)
         .map((point) => {
           let value = getMetricValue(point, metric, testType);
@@ -223,7 +255,7 @@ export function Heatmaps() {
     const colorBarHeight = settings.dimensions.height;
     const colorBarX = settings.dimensions.width + 40;
     const colorBarY = 20;
-
+  
     // create the gradient by sampling each element in the color bar
     for (let i = 0; i < colorBarHeight; i++) {
       const normalized = (colorBarHeight - i) / colorBarHeight;
@@ -232,28 +264,31 @@ export function Heatmaps() {
       );
       ctx.fillRect(colorBarX, colorBarY + i, colorBarWidth, 1);
     }
-
+  
     // define ticks and labels
     const numTicks = 10;
-    ctx.fillStyle = "black";
+  
+    // make label color theme-aware
+    ctx.fillStyle = isEmptyFloorplan ? "#F9FAFB" : "#1F2937"; // white for dark floorplan, dark for light floorplan
     ctx.font = "14px Arial";
     ctx.textAlign = "left";
-
+  
     for (let i = 0; i <= numTicks; i++) {
       const y = colorBarY + (colorBarHeight * i) / numTicks;
       const value = max - ((max - min) * i) / numTicks;
       const label = formatValue(value, metric, testType);
-
+  
       // Draw tick
       ctx.beginPath();
       ctx.moveTo(colorBarX, y);
       ctx.lineTo(colorBarX + 10, y);
       ctx.stroke();
-
+  
       // Draw label
       ctx.fillText(label, colorBarX + colorBarWidth + 15, y + 5);
     }
   }
+  
 
   /**
    * getHeatmapRange - scan the array and return the range
@@ -294,6 +329,7 @@ export function Heatmaps() {
     (
       metric: MeasurementTestType,
       testType: keyof IperfTestProperty,
+      options?: { backgroundImageSrc?: string; srcPoints?: SurveyPoint[] },
     ): Promise<string | null> => {
       return (async () => {
         if (
@@ -325,11 +361,11 @@ export function Heatmaps() {
           return null;
         }
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = isEmptyFloorplan ? "rgba(17, 24, 39, 0.75)" : "rgba(255, 255, 255, 1)";
         ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
 
         // get an array of the enabled, non-null points to be plotted
-        const heatmapData = generateHeatmapData(metric, testType);
+        const heatmapData = generateHeatmapData(metric, testType, options?.srcPoints);
         const heatmapValues = heatmapData.map((p) => p.value);
 
         const { min, max } = getHeatmapRange(
@@ -342,17 +378,13 @@ export function Heatmaps() {
         glCanvas.width = settings.dimensions.width;
         glCanvas.height = settings.dimensions.height;
 
-        const renderer = createHeatmapWebGLRenderer(
-          glCanvas,
-          heatmapData,
-          settings.gradient,
-        );
+        const renderer = createHeatmapWebGLRenderer(glCanvas, heatmapData, settings.gradient);
         await renderer.render({
           points: heatmapData,
           influenceRadius: settings.radiusDivider || displayedRadius,
           maxOpacity: settings.maxOpacity,
           minOpacity: settings.minOpacity,
-          backgroundImageSrc: settings.floorplanImagePath,
+          backgroundImageSrc: options?.backgroundImageSrc ?? activeFloor?.path,
           width: settings.dimensions.width,
           height: settings.dimensions.height,
         });
@@ -383,7 +415,7 @@ export function Heatmaps() {
             ctx.font = `${optimalFontSize}px sans-serif`;
           }
 
-          ctx.fillStyle = "rgba(255, 255,255, 0.9)";
+          ctx.fillStyle = "rgba(209, 213, 219, 0.6)";
           ctx.fillRect(
             settings.dimensions.width / 2 - maxWidth / 2 + 5,
             (settings.dimensions.height * 2) / 3 - 72 + lineSpacing + 5,
@@ -391,7 +423,10 @@ export function Heatmaps() {
             totalHeight,
           );
 
-          ctx.fillStyle = "black";
+          ctx.fillStyle = isEmptyFloorplan 
+          ? "#F9FAFB" 
+          : "#1F2937";
+          
           lines.forEach((line, index) => {
             ctx.fillText(
               line,
@@ -426,26 +461,53 @@ export function Heatmaps() {
 
   const generateAllHeatmaps = useCallback(async () => {
     const newHeatmaps: { [key: string]: string | null } = {};
-    for (const metric of selectedMetrics) {
-      if (metric === "signalStrength") {
-        newHeatmaps[metric] = await renderHeatmap(metric, "signalStrength");
-      } else {
-        const availableProperties = getAvailableProperties(metric);
-        for (const testType of selectedProperties) {
-          if (availableProperties.includes(testType)) {
-            const heatmapData = generateHeatmapData(metric, testType);
-            if (heatmapData) {
-              newHeatmaps[`${metric}-${testType}`] = await renderHeatmap(
-                metric,
-                testType,
-              );
+    if (mode === "2d") {
+      for (const metric of selectedMetrics) {
+        if (metric === "signalStrength") {
+          newHeatmaps[metric] = await renderHeatmap(metric, "signalStrength");
+        } else {
+          const availableProperties = getAvailableProperties(metric);
+          for (const testType of selectedProperties) {
+            if (availableProperties.includes(testType)) {
+              const heatmapData = generateHeatmapData(metric, testType);
+              if (heatmapData) {
+                newHeatmaps[`${metric}-${testType}`] = await renderHeatmap(
+                  metric,
+                  testType,
+                );
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // 3D mode: generate per-floor heatmaps
+      for (const metric of selectedMetrics) {
+        if (metric === "signalStrength") {
+          for (const floorEntry of pointsByFloor) {
+            const key = `${metric}-floor-${floorEntry.z}`;
+            newHeatmaps[key] = await renderHeatmap(metric, "signalStrength", {
+              backgroundImageSrc: floorEntry.floor.path,
+              srcPoints: floorEntry.points,
+            });
+          }
+        } else {
+          const availableProperties = getAvailableProperties(metric);
+          for (const testType of selectedProperties) {
+            if (!availableProperties.includes(testType)) continue;
+            for (const floorEntry of pointsByFloor) {
+              const key = `${metric}-${testType}-floor-${floorEntry.z}`;
+              newHeatmaps[key] = await renderHeatmap(metric, testType, {
+                backgroundImageSrc: floorEntry.floor.path,
+                srcPoints: floorEntry.points,
+              });
             }
           }
         }
       }
     }
     setHeatmaps(newHeatmaps);
-  }, [renderHeatmap, selectedMetrics, selectedProperties, generateHeatmapData]);
+  }, [renderHeatmap, selectedMetrics, selectedProperties, generateHeatmapData, mode, pointsByFloor]);
 
   const openHeatmapModal = (src: string, alt: string) => {
     setSelectedHeatmap({ src, alt });
@@ -495,11 +557,11 @@ export function Heatmaps() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Heatmaps</h2>
+    <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold mb-4 text-gray-600">Heatmaps</h2>
 
       <div className="mb-4">
-        <h3 className="text-lg font-medium mb-2 text-gray-700">
+        <h3 className="text-lg font-medium mb-2 text-gray-600">
           Select Metrics
         </h3>
         <div className="flex flex-wrap gap-4">
@@ -521,8 +583,8 @@ export function Heatmaps() {
         </div>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-lg font-medium mb-2 text-gray-700">
+      <div className="mb-6 ">
+        <h3 className="text-lg font-medium mb-2 text-foreground">
           Select Properties
         </h3>
         <div className="flex flex-wrap gap-4">
@@ -550,59 +612,105 @@ export function Heatmaps() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {selectedMetrics.map((metric) => (
-          <div key={metric} className="bg-gray-50 p-4 rounded-lg">
+          <div key={metric} className="rgba(17, 24, 39, 0.8) p-4 rounded-lg">
             <h3 className="text-lg font-medium mb-3 text-gray-700">
               {metricTitles[metric]}
             </h3>
-            {metric === "signalStrength" ? (
-              heatmaps[metric] && (
-                <div>
-                  <div className="mb-4 flex items-center space-x-2">
-                    <Switch
-                      id="signal-strength-percentage"
-                      checked={showSignalStrengthAsPercentage}
-                      onCheckedChange={setShowSignalStrengthAsPercentage}
+            {mode === "2d" ? (
+              metric === "signalStrength" ? (
+                heatmaps[metric] && (
+                  <div>
+                    <div className="mb-4 flex items-center space-x-2">
+                      <Switch
+                        id="signal-strength-percentage"
+                        checked={showSignalStrengthAsPercentage}
+                        onCheckedChange={setShowSignalStrengthAsPercentage}
+                      />
+                      <label
+                        htmlFor="signal-strength-percentage"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Show Signal Strength as Percentage
+                      </label>
+                    </div>
+                    <HeatmapImage
+                      src={heatmaps[metric]}
+                      alt={`Heatmap for ${metricTitles[metric]}`}
+                      onClick={() =>
+                        openHeatmapModal(
+                          heatmaps[metric]!,
+                          `Heatmap for ${metricTitles[metric]}`,
+                        )
+                      }
                     />
-                    <label
-                      htmlFor="signal-strength-percentage"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Show Signal Strength as Percentage
-                    </label>
                   </div>
-                  <HeatmapImage
-                    src={heatmaps[metric]}
-                    alt={`Heatmap for ${metricTitles[metric]}`}
-                    onClick={() =>
-                      openHeatmapModal(
-                        heatmaps[metric]!,
-                        `Heatmap for ${metricTitles[metric]}`,
-                      )
-                    }
-                  />
+                )
+              ) : (
+                <div className="space-y-4">
+                  {selectedProperties.map((testType) => {
+                    const heatmap = heatmaps[`${metric}-${testType}`];
+                    if (!heatmap) return null;
+                    const alt = `Heatmap for ${metricTitles[metric]} - ${propertyTitles[testType]}`;
+                    return (
+                      <div key={`${metric}-${testType}`}>
+                        <h4 className="text-sm font-medium mb-2 text-gray-600">
+                          {propertyTitles[testType]}
+                        </h4>
+                        <HeatmapImage
+                          src={heatmap}
+                          alt={alt}
+                          onClick={() => openHeatmapModal(heatmap, alt)}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )
             ) : (
+              // 3D mode: render a stacked view for this metric across floors
               <div className="space-y-4">
-                {selectedProperties.map((testType) => {
-                  const heatmap = heatmaps[`${metric}-${testType}`];
-                  if (!heatmap) {
-                    return null;
-                  }
-                  const alt = `Heatmap for ${metricTitles[metric]} - ${propertyTitles[testType]}`;
-                  return (
-                    <div key={`${metric}-${testType}`}>
+                {metric === "signalStrength" ? (
+                  pointsByFloor.map((floorEntry) => {
+                    const key = `${metric}-floor-${floorEntry.z}`;
+                    const heatmap = heatmaps[key];
+                    if (!heatmap) return null;
+                    return (
+                      <div key={key} className="p-2 bg-white/5 rounded">
+                        <div className="text-sm font-medium mb-1">{floorEntry.floor.name}</div>
+                        <HeatmapImage
+                          src={heatmap}
+                          alt={`3D ${metricTitles[metric]} - ${floorEntry.floor.name}`}
+                          onClick={() => openHeatmapModal(heatmap, `3D ${metricTitles[metric]} - ${floorEntry.floor.name}`)}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  selectedProperties.map((testType) => (
+                    <div key={testType}>
                       <h4 className="text-sm font-medium mb-2 text-gray-600">
                         {propertyTitles[testType]}
                       </h4>
-                      <HeatmapImage
-                        src={heatmap}
-                        alt={alt}
-                        onClick={() => openHeatmapModal(heatmap, alt)}
-                      />
+                      <div className="space-y-3">
+                        {pointsByFloor.map((floorEntry) => {
+                          const key = `${metric}-${testType}-floor-${floorEntry.z}`;
+                          const heatmap = heatmaps[key];
+                          if (!heatmap) return null;
+                          return (
+                            <div key={key} className="p-2 bg-white/5 rounded">
+                              <div className="text-sm font-medium mb-1">{floorEntry.floor.name}</div>
+                              <HeatmapImage
+                                src={heatmap}
+                                alt={`3D ${metricTitles[metric]} - ${propertyTitles[testType]} - ${floorEntry.floor.name}`}
+                                onClick={() => openHeatmapModal(heatmap, `3D ${metricTitles[metric]} - ${propertyTitles[testType]} - ${floorEntry.floor.name}`)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  );
-                })}
+                  ))
+                )}
               </div>
             )}
           </div>

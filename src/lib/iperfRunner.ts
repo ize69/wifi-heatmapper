@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/iperfRunner.ts
+ * Purpose: Coordinate Wi‑Fi scans and iperf3 measurements for a survey point.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use server";
 import {
   PartialHeatmapSettings,
@@ -5,7 +12,7 @@ import {
   IperfTestProperty,
   WifiResults,
 } from "./types";
-// import { scanWifi, blinkWifi } from "./wifiScanner";
+//import { scanWifi, blinkWifi } from "./wifiScanner";
 import { execAsync, delay } from "./server-utils";
 import { getCancelFlag, sendSSEMessage } from "./server-globals";
 import { percentageToRssi, toMbps, getDefaultIperfResults } from "./utils";
@@ -19,20 +26,24 @@ type TestDirection = "Up" | "Down";
 
 const wifiActions = await createWifiActions();
 
+/**
+ * Ensure that the Wi‑Fi metadata didn't change between scans.
+ * Returns true when consistent, false otherwise.
+ */
 const validateWifiDataConsistency = (
   wifiDataBefore: WifiResults,
   wifiDataAfter: WifiResults,
-) => {
-  if (
+): boolean => {
+  const consistent =
     wifiDataBefore.bssid === wifiDataAfter.bssid &&
     wifiDataBefore.ssid === wifiDataAfter.ssid &&
     wifiDataBefore.band === wifiDataAfter.band &&
-    wifiDataBefore.channel === wifiDataAfter.channel
-  ) {
-    return true;
+    wifiDataBefore.channel === wifiDataAfter.channel;
+  if (!consistent) {
+    const logString = `${JSON.stringify(wifiDataBefore.bssid)} ${JSON.stringify(wifiDataAfter.bssid)}`;
+    logger.debug(logString);
   }
-  const logString = `${JSON.stringify(wifiDataBefore.bssid)} ${JSON.stringify(wifiDataAfter.bssid)}`;
-  logger.debug(logString);
+  return consistent;
 };
 
 function arrayAverage(arr: number[]): number {
@@ -84,6 +95,11 @@ function checkForCancel() {
  * @param settings
  * @returns the WiFi and iperf results for this location
  */
+/**
+ * async function runSurveyTests — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function runSurveyTests(
   settings: PartialHeatmapSettings,
 ): Promise<{
@@ -91,6 +107,16 @@ export async function runSurveyTests(
   wifiData: WifiResults | null;
   status: string;
 }> {
+  /**
+   * runSurveyTests
+   * Orchestrates a single survey measurement at a point:
+   * - performs preflight checks
+   * - builds an ordered list of iperf servers (primary, backup)
+   * - scans Wi‑Fi and captures signal strengths
+   * - runs TCP and UDP iperf tests using runSingleTestWithFallback
+   * - sends incremental SSE updates via `sendSSEMessage`
+   * Returns wifi data and optional iperf results (null if iperf failed).
+   */
   // first check the settings and return cogent error if not good
   const preResults = await wifiActions.preflightSettings(settings);
   if (preResults.reason != "") {
@@ -103,25 +129,56 @@ export async function runSurveyTests(
   // (say, you have moved to another subnet)
   let noIperfTestReason = "";
   let performIperfTest = true; // assume we will run iperf3 test
+  // build the servers list based on reachability (try primary, then backup)
+  const servers: string[] = [];
   if (settings.iperfServerAdrs == "localhost") {
     performIperfTest = false;
     noIperfTestReason = "Not performed";
-  }
-  // otherwise check if the server is available
-  else {
+  } else {
+    // try primary
     const resp = await wifiActions.checkIperfServer(settings);
-    logger.debug(`checkIperfServer returned: ${resp}`);
-
-    if (resp.reason != "") {
-      performIperfTest = false;
-      noIperfTestReason = resp.reason;
+    logger.debug(`checkIperfServer(primary) returned: ${JSON.stringify(resp)}`);
+    if (resp.reason == "") {
+      servers.push(settings.iperfServerAdrs);
+      // add backup as fallback if provided (no need to pre-validate)
+      if (
+        settings.iperfServerBackupAdrs &&
+        settings.iperfServerBackupAdrs.trim().toLowerCase() !== "localhost" &&
+        settings.iperfServerBackupAdrs !== settings.iperfServerAdrs
+      ) {
+        servers.push(settings.iperfServerBackupAdrs);
+      }
+    } else {
+      // primary failed; try backup if configured
+      if (
+        settings.iperfServerBackupAdrs &&
+        settings.iperfServerBackupAdrs.trim().toLowerCase() !== "localhost" &&
+        settings.iperfServerBackupAdrs !== settings.iperfServerAdrs
+      ) {
+        const backupSettings = { ...settings, iperfServerAdrs: settings.iperfServerBackupAdrs };
+        const resp2 = await wifiActions.checkIperfServer(backupSettings);
+        logger.debug(`checkIperfServer(backup) returned: ${JSON.stringify(resp2)}`);
+        if (resp2.reason == "") {
+          // use backup as primary for tests, and keep original primary as fallback
+          servers.push(settings.iperfServerBackupAdrs);
+          servers.push(settings.iperfServerAdrs);
+        } else {
+          performIperfTest = false;
+          noIperfTestReason = resp.reason || resp2.reason || "Cannot connect to iperf3 server.";
+        }
+      } else {
+        performIperfTest = false;
+        noIperfTestReason = resp.reason || "Cannot connect to iperf3 server.";
+      }
     }
   }
 
   // begin the survey
   try {
-    const maxRetries = 1;
+    const maxRetries = 3;
     let attempts = 0;
+    const attemptsByServer: Record<string, number> = {}; // track how many times we've tried each server
+    let iperfSucceeded = false;
     const newIperfData = getDefaultIperfResults();
     let newWifiData: WifiResults | null = null;
 
@@ -147,7 +204,12 @@ export async function runSurveyTests(
     while (attempts < maxRetries) {
       attempts++;
       try {
-        const server = settings.iperfServerAdrs;
+        // rotate servers so each attempt starts with the next server in list
+        const rotation = servers.length > 0 ? (attempts - 1) % servers.length : 0;
+        const orderedServers = servers.length > 0
+          ? servers.slice(rotation).concat(servers.slice(0, rotation))
+          : servers;
+        const server = orderedServers[0];
         const duration = settings.testDuration;
         const wifiStrengths: number[] = []; // percentages
         // add the SSID to the header if it's not <redacted>
@@ -167,21 +229,35 @@ export async function runSurveyTests(
         checkForCancel();
         sendSSEMessage(getUpdatedMessage());
 
-        // Run the TCP tests
+        // Run the TCP tests (try backup server on failure)
         if (performIperfTest) {
-          newIperfData.tcpDownload = await runSingleTest(
-            server,
-            duration,
-            "Down",
-            "TCP",
-          );
-          newIperfData.tcpUpload = await runSingleTest(
-            server,
-            duration,
-            "Up",
-            "TCP",
-          );
-          displayStates.tcp = `${toMbps(newIperfData.tcpDownload.bitsPerSecond)} / ${toMbps(newIperfData.tcpUpload.bitsPerSecond)} Mbps`;
+          try {
+            newIperfData.tcpDownload = await runSingleTestWithFallback(
+              orderedServers,
+              duration,
+              "Down",
+              "TCP",
+              attemptsByServer,
+              attempts,
+              maxRetries,
+            );
+            newIperfData.tcpUpload = await runSingleTestWithFallback(
+              orderedServers,
+              duration,
+              "Up",
+              "TCP",
+              attemptsByServer,
+              attempts,
+              maxRetries,
+            );
+            displayStates.tcp = `${toMbps(newIperfData.tcpDownload.bitsPerSecond)} / ${toMbps(newIperfData.tcpUpload.bitsPerSecond)} Mbps`;
+            iperfSucceeded = true;
+          } catch (err: any) {
+            logger.warn(`TCP iperf tests failed: ${err}`);
+            // mark as not performing further iperf work for this attempt
+            iperfSucceeded = false;
+            displayStates.tcp = `iperf failed`;
+          }
         } else {
           await delay(500);
           displayStates.tcp = noIperfTestReason;
@@ -195,21 +271,33 @@ export async function runSurveyTests(
         checkForCancel();
         sendSSEMessage(getUpdatedMessage());
 
-        // Run the UDP tests
+        // Run the UDP tests (try backup server on failure)
         if (performIperfTest) {
-          newIperfData.udpDownload = await runSingleTest(
-            server,
-            duration,
-            "Down",
-            "UDP",
-          );
-          newIperfData.udpUpload = await runSingleTest(
-            server,
-            duration,
-            "Up",
-            "UDP",
-          );
-          displayStates.udp = `${toMbps(newIperfData.udpDownload.bitsPerSecond)} / ${toMbps(newIperfData.udpUpload.bitsPerSecond)} Mbps`;
+          try {
+            newIperfData.udpDownload = await runSingleTestWithFallback(
+              orderedServers,
+              duration,
+              "Down",
+              "UDP",
+              attemptsByServer,
+              attempts,
+              maxRetries,
+            );
+            newIperfData.udpUpload = await runSingleTestWithFallback(
+              orderedServers,
+              duration,
+              "Up",
+              "UDP",
+              attemptsByServer,
+              attempts,
+              maxRetries,
+            );
+            displayStates.udp = `${toMbps(newIperfData.udpDownload.bitsPerSecond)} / ${toMbps(newIperfData.udpUpload.bitsPerSecond)} Mbps`;
+            iperfSucceeded = iperfSucceeded || true;
+          } catch (err: any) {
+            logger.warn(`UDP iperf tests failed: ${err}`);
+            displayStates.udp = `iperf failed`;
+          }
         } else {
           await delay(500);
           displayStates.udp = noIperfTestReason;
@@ -222,11 +310,7 @@ export async function runSurveyTests(
         displayStates.strength = arrayAverage(wifiStrengths).toString();
         checkForCancel();
 
-        // Send the final update - type is "done"
-        displayStates.type = "done";
-        displayStates.header = "Measurement complete";
-        sendSSEMessage(getUpdatedMessage());
-
+        // Validate wifi consistency and prepare the wifiData for return.
         if (
           !validateWifiDataConsistency(
             wifiDataBefore.SSIDs[0],
@@ -244,6 +328,9 @@ export async function runSurveyTests(
           signalStrength: strength, // use the average signalStrength
           rssi: percentageToRssi(strength), // set corresponding RSSI
         };
+
+        // Successful measurement for this attempt; break out to finish up.
+        break;
       } catch (error: any) {
         logger.error(`Attempt ${attempts} failed:`, error);
         if (error.message == "cancelled") {
@@ -256,8 +343,18 @@ export async function runSurveyTests(
       }
     }
 
-    // return the values ("!" asserts that the values are non-null)
-    return { iperfData: newIperfData!, wifiData: newWifiData!, status: "" };
+    // After attempts, check we have wifi data to return
+    if (!newWifiData) {
+      return { iperfData: iperfSucceeded ? newIperfData! : null, wifiData: null, status: "No valid wifi data after attempts" };
+    }
+
+    // Send the final update - type is "done"
+    displayStates.type = "done";
+    displayStates.header = "Measurement complete";
+    sendSSEMessage(getUpdatedMessage());
+
+    // return the values (return iperfData null if iperf tests failed)
+    return { iperfData: iperfSucceeded ? newIperfData! : null, wifiData: newWifiData!, status: "" };
   } catch (error) {
     logger.error("Error running measurement tests:", error);
     sendSSEMessage({
@@ -270,6 +367,16 @@ export async function runSurveyTests(
   }
 }
 
+/**
+ * Execute a single iperf3 test against `server` and return the parsed
+ * `IperfTestProperty`.
+ * @param server host (or host:port) of iperf3 server
+ * @param duration test duration in seconds
+ * @param testDir "Up" or "Down"
+ * @param testType "TCP" or "UDP"
+ * @returns parsed iperf test metrics
+ * @throws if iperf3 invocation fails or JSON is malformed
+ */
 async function runSingleTest(
   server: string,
   duration: number,
@@ -297,6 +404,54 @@ async function runSingleTest(
   return extracted;
 }
 
+/**
+ * Try the list of `servers` in order; for each server call `runSingleTest`.
+ * Increments `attemptsByServer[server]` on each try and emits SSE updates
+ * describing which server and attempt number is being tried. If all servers
+ * fail the last error is thrown.
+ */
+async function runSingleTestWithFallback(
+  servers: string[],
+  duration: number,
+  testDir: TestDirection,
+  testType: TestType,
+  attemptsByServer: Record<string, number>,
+  overallAttempt: number,
+  maxAttempts: number,
+): Promise<IperfTestProperty> {
+  let lastError: any = null;
+  for (const s of servers) {
+    try {
+      // increment per-server attempt counter
+      attemptsByServer[s] = (attemptsByServer[s] || 0) + 1;
+      // update SSE so the UI shows which server and which attempt we're on
+      displayStates.header = `Attempt ${overallAttempt}/${maxAttempts} — trying ${s}`;
+      displayStates.tcp = displayStates.tcp; // keep existing values
+      displayStates.udp = displayStates.udp;
+      sendSSEMessage(getUpdatedMessage());
+
+      return await runSingleTest(s, duration, testDir, testType);
+    } catch (err) {
+      lastError = err;
+      logger.warn(`Iperf test failed for server ${s}, trying next if available: ${err}`);
+      displayStates.header = `Attempt ${overallAttempt}/${maxAttempts} — ${s} failed, trying next`;
+      sendSSEMessage(getUpdatedMessage());
+    }
+  }
+  // if we fall through, rethrow last error
+  throw lastError || new Error("No servers provided for iperf test");
+}
+
+/**
+ * Convert raw iperf3 JSON output into an `IperfTestProperty`.
+ * Handles differences between older and newer iperf3 JSON structures.
+ * Throws when no usable `bits_per_second` value can be found.
+ */
+/**
+ * async function extractIperfData — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function extractIperfData(
   result: {
     end: {

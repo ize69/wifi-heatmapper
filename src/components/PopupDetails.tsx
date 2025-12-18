@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/PopupDetails.tsx
+ * Purpose: Small popup UI that displays details for a single survey point.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { useState } from "react";
 import { SurveyPoint, HeatmapSettings, SurveyPointActions } from "@/lib/types";
 import { formatMacAddress, metricFormatter } from "@/lib/utils";
@@ -120,50 +127,55 @@ const PopupDetails: React.FC<PopupDetailsProps> = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-lg text-xs overflow-hidden">
-      <div className="flex justify-between items-center bg-gray-100 px-2 py-1">
-        <h3 className="font-semibold text-sm">Measurement Details</h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-          <X size={16} />
-        </button>
-      </div>
-      <Table>
-        <TableBody>
-          {rows.map((row, index) => (
-            <TableRow
-              key={row.label}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            >
-              <TableCell className="py-1 px-2 font-medium">
-                {row.label}
-              </TableCell>
-              <TableCell className="py-1 px-2">{row.value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <div className="flex justify-between items-center px-2 py-2 bg-gray-100">
-        <div className="flex items-center space-x-2">
-          <Switch checked={isEnabled} onCheckedChange={handleToggle} />
-          <span>Enabled</span>
-        </div>
-        <AlertDialogModal
-          title="Delete Measurement?"
-          description="Are you sure you want to delete this measurement?"
-          onCancel={() => {}}
-          onConfirm={() => handleDelete(point)}
+<div className="bg-gray-800 border border-gray-700 rounded-md shadow-lg text-xs overflow-hidden text-gray-100">
+  {/* Header */}
+  <div className="flex justify-between items-center bg-gray-900 px-3 py-2">
+    <h3 className="font-semibold text-sm text-gray-100">Measurement Details</h3>
+    <button onClick={onClose} className="text-gray-400 hover:text-gray-200">
+      <X size={16} />
+    </button>
+  </div>
+
+  {/* Table */}
+  <Table className="bg-gray-800">
+    <TableBody>
+      {rows.map((row, index) => (
+        <TableRow
+          key={row.label}
+          className={index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"}
         >
-          <Button
-            variant="destructive"
-            size="sm"
-            className="flex items-center space-x-1"
-          >
-            <Trash2 size={14} />
-            <span>Delete</span>
-          </Button>
-        </AlertDialogModal>
-      </div>
+          <TableCell className="py-1 px-2 font-medium text-gray-100">{row.label}</TableCell>
+          <TableCell className="py-1 px-2 text-gray-100">{row.value}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+
+  {/* Footer */}
+  <div className="flex justify-between items-center px-3 py-2 bg-gray-900 border-t border-gray-700">
+    <div className="flex items-center space-x-2">
+      <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+      <span className="text-gray-100">Enabled</span>
     </div>
+    <AlertDialogModal
+      title="Delete Measurement?"
+      description="Are you sure you want to delete this measurement?"
+      onCancel={() => {}}
+      onConfirm={() => handleDelete(point)}
+    >
+      <Button
+        variant="destructive"
+        size="sm"
+        className="flex items-center space-x-1"
+      >
+        <Trash2 size={14} />
+        <span>Delete</span>
+      </Button>
+    </AlertDialogModal>
+  </div>
+</div>
+
+
   );
 };
 

@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/logger.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { Logger } from "tslog";
 
 const rootLogger = new Logger({
@@ -9,6 +16,11 @@ const rootLogger = new Logger({
   stylePrettyLogs: false,
 });
 
+/**
+ * function getLogger — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function getLogger(name: string) {
   return rootLogger.getSubLogger({ name });
 }

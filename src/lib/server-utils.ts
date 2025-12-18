@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/server-utils.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use server";
 import { exec, ExecOptions, spawn } from "child_process";
 // import { getLogger } from "./logger";
@@ -22,6 +29,11 @@ import { exec, ExecOptions, spawn } from "child_process";
  * @returns { stdout , stderr }
  */
 
+/**
+ * const execAsync = async — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const execAsync = async (
   command: string,
 ): Promise<{ stdout: string; stderr: string }> => {
@@ -36,7 +48,7 @@ export const execAsync = async (
         reject(error);
       } else {
         // logger.info(`Command result: ${JSON.stringify(stdout)}`);
-        resolve({ stdout: stdout.trimEnd(), stderr: stderr.trimEnd() });
+        resolve({ stdout: String(stdout).trim(), stderr: String(stderr).trim() });
       }
     });
   });
@@ -53,6 +65,11 @@ export const execAsync = async (
  * @param command - command to run
  * @param args array of arguments to pass along
  */
+/**
+ * async function runDetached — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function runDetached(command: string, args: string[] = []) {
   const subprocess = spawn(command, args, {
     detached: true,
@@ -67,6 +84,11 @@ export async function runDetached(command: string, args: string[] = []) {
  * delay a given number of milliseconds
  * @param ms:number - number of milliseconds to delay
  * @returns Promise<void>
+ */
+/**
+ * async function delay — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

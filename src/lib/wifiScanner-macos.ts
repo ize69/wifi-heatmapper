@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/wifiScanner-macos.ts
+ * Purpose: macOS-specific implementation of Wi‑Fi scanning and iperf checks.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import {
   PartialHeatmapSettings,
   WifiResults,
@@ -17,6 +24,11 @@ import {
 import { getLogger } from "./logger";
 const logger = getLogger("wifi-macOS");
 
+/**
+ * type MergeResult = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type MergeResult = {
   added: boolean; // current SSID was added to the results
   index: number; // position that the current was inserted into
@@ -304,6 +316,11 @@ async function getWdutilResults(
  * @returns WifiResults[] sorted by signalStrength
  */
 
+/**
+ * const getNeighborSSIDs = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const getNeighborSSIDs = (
   spData: SPAirPortRoot,
   currentInterface: string,
@@ -347,6 +364,11 @@ export const getNeighborSSIDs = (
  *      that WifiResult will be marked with  currentSSID: true
  */
 
+/**
+ * const getCurrentSSID = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const getCurrentSSID = (
   spData: SPAirPortRoot,
   currentInterface: string,
@@ -396,6 +418,11 @@ export const getCurrentSSID = (
  * - Min. diff of RSSI > ALLOWED DELTA push new, return true/ix
  */
 
+/**
+ * function mergeSSIDs — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function mergeSSIDs(
   neighbors: WifiResults[],
   current: WifiResults[],
@@ -800,11 +827,21 @@ function inferChannelWidth(channel: string, phymode: string): string {
   }
 }
 
+/**
+ * function logSPResults — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function logSPResults(results: Record<string, any>[]): void {
   logger.info(`===== system_profiler results =====`);
   results.forEach(logSPResult);
 }
 
+/**
+ * async function logSPResult — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function logSPResult(result: Record<string, any>) {
   logger.info(
     `active: ${result.active}; signalStrength: ${result.spairport_signal_noise}; channel: ${result.spairport_network_channel}; ssid: ${result._name}`,

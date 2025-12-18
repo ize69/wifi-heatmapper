@@ -1,9 +1,21 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/renderers/mainRenderer.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { Gradient } from "@/lib/types";
 
 import { createWebGLContext } from "../utils/webGLUtils";
 import { createBackgroundLayerRenderer } from "./layers/imageLayerRenderer";
 import { createHeatmapLayerRenderer } from "./layers/heatmapLayerRenderer";
 
+/**
+ * type HeatmapPoint = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type HeatmapPoint = {
   x: number;
   y: number;

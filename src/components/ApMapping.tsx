@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ApMapping.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ui/alert-dialog.tsx
+ * Small UI component used by the app.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 
 import * as React from "react";

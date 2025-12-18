@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/Slider.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React from "react";
 import { PopoverHelper } from "@/components/PopoverHelpText";
 import * as Slider from "@radix-ui/react-slider";
@@ -7,6 +14,11 @@ interface HeatmapSliderProps {
   onChange: (val: number) => void;
 }
 
+/**
+ * function HeatmapSlider — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function HeatmapSlider({ value, onChange }: HeatmapSliderProps) {
   return (
     <div className="w-64">

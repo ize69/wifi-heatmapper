@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/renderers/layers/heatmapLayerRenderer.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { Gradient } from "@/lib/types";
 import { HeatmapPoint } from "../mainRenderer";
 import generateFragmentShader from "../../shaders/heatmapFragmentShader";
@@ -11,6 +18,11 @@ import { fullscreenQuadVertexShaderFlipY } from "@/app/webGL/shaders/fullscreenQ
 import _ from "lodash";
 import { createGradientLUTTexture } from "../textures/createGradientLUTTexture";
 
+/**
+ * const createHeatmapLayerRenderer = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const createHeatmapLayerRenderer = (
   gl: WebGLRenderingContext,
   points: HeatmapPoint[],

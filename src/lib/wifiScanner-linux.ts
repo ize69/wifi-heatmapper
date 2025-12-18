@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/wifiScanner-linux.ts
+ * Purpose: Linux-specific implementation of Wi‑Fi scanning and iperf checks.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import {
   PartialHeatmapSettings,
   WifiResults,
@@ -17,6 +24,11 @@ import isDocker from "is-docker";
 import { getLogger } from "./logger";
 const logger = getLogger("wifi-Linux");
 
+/**
+ * class LinuxWifiActions implements WifiActions — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export class LinuxWifiActions implements WifiActions {
   nameOfWifi: string = ""; // OS-specific name of the current wifi interface
   currentSSIDName: string = ""; // name of the current SSID
@@ -235,6 +247,11 @@ async function iwDevInfo(interfaceId: string): Promise<string> {
  * @param infoOutput
  * @returns
  */
+/**
+ * function parseIwOutput — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function parseIwOutput(
   linkOutput: string,
   infoOutput: string,
@@ -307,6 +324,11 @@ export function parseIwOutput(
  * @param line - read from nmcli -t command (":" delimited)
  * @returns array of columns
  */
+/**
+ * function splitColonDelimited — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function splitColonDelimited(line: string) {
   const result = [];
   let current = "";
@@ -342,6 +364,11 @@ export function splitColonDelimited(line: string) {
  * getCandidates(nmcliData) - pluck up the local SSIDs from nmcli output
  * @param - Object that contains output of system_profiler for Wifi
  * @returns WifiResults[] sorted by signalStrength
+ */
+/**
+ * const getCandidateSSIDs = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const getCandidateSSIDs = (nmcliData: string): WifiResults[] => {
   const candidates = [];
@@ -391,6 +418,11 @@ function stripMbps(str: string): number {
  * frequencyToChannel(freq)
  * @param frequency (as number)
  * @returns channel (number)
+ */
+/**
+ * function frequencyToChannel — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function frequencyToChannel(freqMHz: number): number | null {
   // 2.4 GHz band

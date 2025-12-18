@@ -1,8 +1,20 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ui/textarea.tsx
+ * Small UI component used by the app.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+/**
+ * interface TextareaProps — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 

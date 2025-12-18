@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/PasswordInput.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button"; // shadcn or your own button component
@@ -7,6 +14,11 @@ type PasswordInputProps = {
   onChange: (value: string) => void;
 };
 
+/**
+ * function PasswordInput — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function PasswordInput({ value, onChange }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
 

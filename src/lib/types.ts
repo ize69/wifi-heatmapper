@@ -1,4 +1,16 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/types.ts
+ * Purpose: Shared TypeScript types and interfaces used across client and server.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // Used for localization map
+/**
+ * type LocalizerMap = Record<string, any>; — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type LocalizerMap = Record<string, any>;
 export interface IperfTestProperty {
   bitsPerSecond: number;
@@ -41,6 +53,11 @@ type IperfTestProperties = {
   [K in keyof IperfTestProperty]: K;
 };
 
+/**
+ * const testProperties — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const testProperties: IperfTestProperties = {
   bitsPerSecond: "bitsPerSecond",
   jitterMs: "jitterMs",
@@ -51,6 +68,11 @@ export const testProperties: IperfTestProperties = {
   signalStrength: "signalStrength",
 } as const;
 
+/**
+ * type TestTypes = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type TestTypes = {
   [K in keyof IperfResults | "signalStrength"]: K;
 };
@@ -63,6 +85,11 @@ export const testTypes: TestTypes = {
   udpUpload: "udpUpload",
 } as const;
 
+/**
+ * type MeasurementTestType = keyof TestTypes; — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type MeasurementTestType = keyof TestTypes;
 
 export interface ApMapping {
@@ -70,17 +97,37 @@ export interface ApMapping {
   macAddress: string;
 }
 
+/**
+ * type Gradient = Record<number, string>; // Maps 0-1 values to colors — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type Gradient = Record<number, string>; // Maps 0-1 values to colors
 
 /**
  * The full set of data for a particular background image
  * This is "global" to the entire GUI, and passed down as needed
  */
+/**
+ * interface HeatmapSettings — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface HeatmapSettings {
   surveyPoints: SurveyPoint[];
   floorplanImageName: string; // name of the floorplan-filename
   floorplanImagePath: string; // path to the /media/floorplan-filename
+  /**
+   * New: support multiple floorplans. Each floorplan has an optional `z`
+   * value (integer). A `z` of undefined or 0 is the default/first floor.
+   */
+  floorplans?: Array<{ name: string; path: string; z?: number }>;
+  /**
+   * The currently active floor z-value. When undefined, defaults to 0.
+   */
+  currentFloorZ?: number;
   iperfServerAdrs: string;
+  iperfServerBackupAdrs?: string;
   testDuration: number;
   sudoerPassword: string; // kept in settings, removed before writing to file
   apMapping: ApMapping[];
@@ -105,6 +152,7 @@ export interface HeatmapSettings {
  */
 export interface PartialHeatmapSettings {
   iperfServerAdrs: string;
+  iperfServerBackupAdrs?: string;
   testDuration: number;
   sudoerPassword: string;
   ignoredSSIDs: string[];
@@ -119,6 +167,10 @@ export type SurveyPoint = {
   y: number;
   wifiData: WifiResults;
   iperfData: IperfResults;
+  /**
+   * The z-value of the floor this point belongs to. Undefined means 0.
+   */
+  floorZ?: number;
   timestamp: number;
   id: string;
   isEnabled: boolean;
@@ -129,27 +181,43 @@ export type SurveyPoint = {
  */
 export interface SurveyResults {
   wifiData: WifiResults;
-  iperfData: IperfResults;
+  iperfData: IperfResults | null;
 }
 
 /**
  * TaskStatus - status of the wifi survey process
  */
 type TaskStatus = "pending" | "done" | "error";
+/**
+ * interface SurveyResult — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface SurveyResult {
   state: TaskStatus; // mimics states of Promise()
   results?: SurveyResults; // if "done", has the wifiData and iperfData
   explanation?: string; // if "error", this is the string to display
 }
 
+/**
+ * type ScannerSettings = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type ScannerSettings = {
   sudoerPassword: string | "";
   wlanInterfaceId: string | "";
 };
 
+/**
+ * type OS = "macos" | "windows" | "linux"; — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type OS = "macos" | "windows" | "linux";
 
 export interface SurveyPointActions {
+  create(p: SurveyPoint): void;
   add: (newPoint: SurveyPoint) => void;
   update: (point: SurveyPoint, updatedData: Partial<SurveyPoint>) => void;
   delete: (points: SurveyPoint[]) => void;
@@ -160,11 +228,21 @@ export interface SurveyPointActions {
  * Pass PartialHeatmapSettings for the essential parameters
  * Return a potentially-empty array of WifiResults and a "reason" string
  */
+/**
+ * interface WifiScanResults — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface WifiScanResults {
   SSIDs: WifiResults[]; // potentially empty
   reason: string; // if noErr "", otherwise an explanation
 }
 
+/**
+ * interface WifiActions — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface WifiActions {
   preflightSettings(settings: PartialHeatmapSettings): Promise<WifiScanResults>; // returns error message
   checkIperfServer(settings: PartialHeatmapSettings): Promise<WifiScanResults>; // returns error message
@@ -181,6 +259,11 @@ export interface WifiActions {
  *    output of system_profiler -json SPAirPortDataType
  */
 
+/**
+ * interface AirportNetwork — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface AirportNetwork {
   _name: string;
   spairport_network_bssid: string;
@@ -192,11 +275,21 @@ export interface AirportNetwork {
   spairport_signal_noise: string;
 }
 
+/**
+ * interface AirportCurrentNetworkInformation extends AirportNetwork — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface AirportCurrentNetworkInformation extends AirportNetwork {
   spairport_network_mcs?: number;
   spairport_network_rate?: number;
 }
 
+/**
+ * interface AirportInterface — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface AirportInterface {
   _name: string;
   spairport_airdrop_channel?: number;
@@ -214,6 +307,11 @@ export interface AirportInterface {
   spairport_wireless_mac_address?: string;
 }
 
+/**
+ * interface SPAirPortSoftwareInformation — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface SPAirPortSoftwareInformation {
   spairport_corewlan_version?: string;
   spairport_corewlankit_version?: string;
@@ -224,11 +322,21 @@ export interface SPAirPortSoftwareInformation {
   spairport_utility_version?: string;
 }
 
+/**
+ * interface SPAirPortEntry — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface SPAirPortEntry {
   spairport_airport_interfaces: AirportInterface[];
   spairport_software_information?: SPAirPortSoftwareInformation;
 }
 
+/**
+ * interface SPAirPortRoot — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export interface SPAirPortRoot {
   TestDescriptionDEADBEEF: string; // used to describe test conditions for this data
   SPAirPortDataType: SPAirPortEntry[];

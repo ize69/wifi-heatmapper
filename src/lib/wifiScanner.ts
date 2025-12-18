@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/wifiScanner.ts
+ * Purpose: Platform-agnostic wrapper that provides Wi‑Fi scanning and iperf checks.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use server";
 import os from "os";
 import { WifiActions, WifiScanResults, WifiResults } from "./types";
@@ -13,6 +20,11 @@ import { LinuxWifiActions } from "./wifiScanner-linux";
 
 const logger = getLogger("wifiScanner");
 
+/**
+ * async function createWifiActions — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function createWifiActions(): Promise<WifiActions> {
   const platform = os.platform();
   switch (platform) {
@@ -41,6 +53,11 @@ export async function createWifiActions(): Promise<WifiActions> {
  * - issue the cmd to start an action (say, bring up the wifi)
  * - continually execute testCmd and wait for its success or failure
  *   to indicate that it has succeeded (or times out)
+ */
+/**
+ * async function loopUntilCondition — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export async function loopUntilCondition(
   cmd: string,
@@ -79,12 +96,22 @@ export async function loopUntilCondition(
   }
 }
 
+/**
+ * async function logWifiResults — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function logWifiResults(results: WifiScanResults): Promise<void> {
   logger.info(`===== WifiResults =====`);
   results.SSIDs.forEach(logWifiResult);
   // logger.info(`==============`);
 }
 
+/**
+ * async function logWifiResult — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function logWifiResult(result: WifiResults) {
   logger.info(
     `active: signalStrength: ${result.signalStrength}; channel: ${result.channel}; ssid: ${result.ssid}`,

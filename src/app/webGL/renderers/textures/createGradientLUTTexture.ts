@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/renderers/textures/createGradientLUTTexture.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // import { setDefaultTextureParams } from "../../utils/webGLDefaults";
 
 /**
@@ -19,6 +26,11 @@ import { Gradient } from "@/lib/types";
  * @param gradient - Gradient stops (keys in [0,1], values as rgba string)
  * @param size - Number of samples (default: 256)
  * @returns WebGLTexture
+ */
+/**
+ * const createGradientLUTTexture = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const createGradientLUTTexture = (
   gl: WebGLRenderingContext,

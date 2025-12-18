@@ -1,14 +1,31 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/utils-gradient.ts
+ * Library helper used by server and client code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * Utility functions for computing gradients and handling colors
  */
 
 import { Gradient } from "./types";
+/**
+ * type RGBA = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type RGBA = { r: number; g: number; b: number; a: number };
 
 /**
  * Converts a (string) "rgba(r,g,b,a)" to {r, g, b, a} object.
  * e.g., the gradient has items like this:
  * { ... 0: "rgba(255, 0, 0, 0.6)", // 0%, -100 dBm ... }
+ */
+/**
+ * function rgbaStringToObject — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function rgbaStringToObject(rgba: string): RGBA {
   const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
@@ -27,6 +44,11 @@ export function rgbaStringToObject(rgba: string): RGBA {
  * objectToRGBAString() - convert an object back to a string
  * @param color { r, g, b, a}
  * @returns string "rgba(r,g,b,a)"
+ */
+/**
+ * function objectToRGBAString — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function objectToRGBAString(color: RGBA): string {
   return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a.toFixed(2)})`;
@@ -83,6 +105,11 @@ export function getColorAt(value: number, gradient: Gradient): RGBA {
   return returnVal;
 }
 
+/**
+ * const rgbaToHex = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const rgbaToHex = (rgba: string) => {
   const parts = rgba.match(/[\d.]+/g);
   if (!parts || parts.length < 3) return "#000000";
@@ -94,6 +121,11 @@ export const rgbaToHex = (rgba: string) => {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
+/**
+ * const hexToRgba = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const hexToRgba = (hex: string, alpha: number) => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);

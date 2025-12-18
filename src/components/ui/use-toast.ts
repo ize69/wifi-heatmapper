@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/ui/use-toast.ts
+ * Small UI component used by the app.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 
 // Inspired by react-hot-toast library
@@ -72,6 +79,11 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout);
 };
 
+/**
+ * const reducer = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":

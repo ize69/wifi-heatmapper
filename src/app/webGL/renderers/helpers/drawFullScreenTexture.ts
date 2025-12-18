@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/renderers/helpers/drawFullScreenTexture.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import { fullscreenQuadVertexShader } from "@/app/webGL/shaders/fullscreenQuadVertexShader";
 import {
   createShaderProgram,
@@ -16,6 +23,11 @@ const contextCache = new WeakMap<
   }
 >();
 
+/**
+ * const drawTextureFullScreen = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const drawTextureFullScreen = (
   gl: WebGLRenderingContext,
   texture: WebGLTexture,

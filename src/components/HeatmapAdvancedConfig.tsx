@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/HeatmapAdvancedConfig.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React from "react";
 
 import {
@@ -18,6 +25,11 @@ import { rgbaToHex, hexToRgba } from "@/lib/utils-gradient";
 import { getLogger } from "@/lib/logger";
 const logger = getLogger("HeatmapAdvancedConfig");
 
+/**
+ * function HeatmapAdvancedConfig — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function HeatmapAdvancedConfig() {
   const { settings, updateSettings } = useSettings();
 

@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/GlobalSettings.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 
 import {
@@ -16,12 +23,21 @@ import { join } from "path";
  * @param floorPlan - desired floor plan, or "" if unknown
  * @returns Set of default settings for that floor plan
  */
+/**
+ * const getDefaults = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const getDefaults = (floorPlan: string): HeatmapSettings => {
   return {
     surveyPoints: [],
     floorplanImageName: floorPlan,
     floorplanImagePath: join("/media", floorPlan),
+    // initialize single-floor list for backward compatibility
+    floorplans: [{ name: floorPlan, path: join("/media", floorPlan), z: 0 }],
+    currentFloorZ: 0,
     iperfServerAdrs: "localhost",
+    iperfServerBackupAdrs: "",
     apMapping: [],
     testDuration: 1,
     sudoerPassword: "",
@@ -60,6 +76,11 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
 );
 
 // Custom hook to use the settings context
+/**
+ * function useSettings — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (!context)
@@ -68,6 +89,11 @@ export function useSettings() {
 }
 
 // Context provider component
+/**
+ * function SettingsProvider — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<HeatmapSettings>(getDefaults(""));
   const [floorplanImage, setFloorplanImage] = useState<string>("");
@@ -113,25 +139,37 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   // grouped into an object
   const surveyPointActions: SurveyPointActions = {
     add: (newPoint: SurveyPoint) => {
-      const newPoints = [...settings.surveyPoints, newPoint];
+      // Ensure a point belongs to exactly one floor: normalize floorZ
+      const floorZ = newPoint.floorZ ?? settings.currentFloorZ ?? 0;
+      const normalized: SurveyPoint = { ...newPoint, floorZ };
+      // Remove any existing point with the same id (prevents duplicates across floors)
+      const filtered = settings.surveyPoints.filter((p) => p.id !== normalized.id);
+      const newPoints = [...filtered, normalized];
       updateSettings({ surveyPoints: newPoints });
     },
 
-    update: (thePoint: SurveyPoint, updatedData: object) => {
-      const newPoints = settings.surveyPoints.map((point) => point.id === thePoint.id ? { ...point, ...updatedData } : point
+    update: (thePoint: SurveyPoint, updatedData: Partial<SurveyPoint>) => {
+      // If floorZ is present in updatedData, ensure it is a single numeric value
+      const updatedFloorZ = (updatedData as Partial<SurveyPoint>).floorZ;
+      const newPoints = settings.surveyPoints.map((point) =>
+        point.id === thePoint.id
+          ? { ...point, ...updatedData, floorZ: updatedFloorZ ?? point.floorZ }
+          : point,
       );
       updateSettings({ surveyPoints: newPoints });
     },
 
     delete: (points: SurveyPoint[]) => {
       const pointsToRemove = new Set(points.map((point) => point.id));
-      const newPoints = settings.surveyPoints.filter(
-        (point) => !pointsToRemove.has(point.id)
-      );
+      const newPoints = settings.surveyPoints.filter((point) => !pointsToRemove.has(point.id));
       updateSettings({ surveyPoints: newPoints });
     },
     create: (newPoint: SurveyPoint) => {
-      const newPoints = [...settings.surveyPoints, newPoint];
+      // create behaves like add: normalize floorZ and prevent duplicates
+      const floorZ = newPoint.floorZ ?? settings.currentFloorZ ?? 0;
+      const normalized: SurveyPoint = { ...newPoint, floorZ };
+      const filtered = settings.surveyPoints.filter((p) => p.id !== normalized.id);
+      const newPoints = [...filtered, normalized];
       updateSettings({ surveyPoints: newPoints });
     },
   };

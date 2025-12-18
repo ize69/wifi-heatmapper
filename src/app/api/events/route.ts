@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/api/events/route.ts
+ * Server API route.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 // /**
 //  * Server-Sent-Events
 //  * These are triggered by a GET to /api/events
@@ -13,12 +20,22 @@ import {
 import { getLogger } from "../../../lib/logger";
 const logger = getLogger("api-events");
 
+/**
+ * type SSEMessageType = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export type SSEMessageType = {
   type: string;
   header: string;
   status: string;
 };
 
+/**
+ * async function GET — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
   const stream = new TransformStream();

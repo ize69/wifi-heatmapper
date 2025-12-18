@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/shaders/heatmapFragmentShader.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * Generates a shader for rendering a weighted signal map.
  *

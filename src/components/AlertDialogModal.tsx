@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/AlertDialogModal.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +17,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+/**
+ * function AlertDialogModal — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function AlertDialogModal({
   title,
   description,

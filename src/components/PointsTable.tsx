@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/PointsTable.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { useCallback, useMemo, useState } from "react";
 import {
   useReactTable,

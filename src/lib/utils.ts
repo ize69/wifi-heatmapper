@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/lib/utils.ts
+ * Purpose: General helper utilities shared by UI and server code.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * A collection of helper functions that may be called either by client
  * or server code.
@@ -14,6 +21,11 @@ import {
 } from "./types";
 import { LocalizerMap } from "./types";
 
+/**
+ * function cn — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -25,6 +37,11 @@ export const rssiToPercentage = (rssi: number): number => {
   return Math.round(((rssi + 100) / 60) * 100);
 };
 
+/**
+ * const percentageToRssi = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const percentageToRssi = (percentage: number): number => {
   return Math.round(-100 + (percentage / 100) * 60);
 };
@@ -33,6 +50,11 @@ export const percentageToRssi = (percentage: number): number => {
  * toMbps - convert a number to a "Mbps" value - two significant digits
  * @param the value (in bits/second) to convert
  * @returns String in format "123.45" (no units)
+ */
+/**
+ * const toMbps = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const toMbps = (value: number): string => {
   return `${(value / 1000000).toFixed(2)}`;
@@ -50,6 +72,11 @@ export const toMbps = (value: number): string => {
  * @param testType
  * @param showSignalStrengthAsPercentage
  * @returns
+ */
+/**
+ * const metricFormatter = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const metricFormatter = (
   value: number,
@@ -83,6 +110,11 @@ export const metricFormatter = (
  * @param ms:number - number of milliseconds to delay
  * @returns Promise<void>
  */
+/**
+ * async function delay — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -109,6 +141,11 @@ export const getDefaultWifiResults = (): WifiResults => {
  * @param macAddress
  * @returns formatted string
  */
+/**
+ * const formatMacAddress = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const formatMacAddress = (macAddress: string) => {
   if (macAddress.includes("redacted")) {
     return macAddress;
@@ -121,6 +158,11 @@ export const formatMacAddress = (macAddress: string) => {
  * @param macAddress
  * @returns
  */
+/**
+ * const normalizeMacAddress = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export const normalizeMacAddress = (macAddress: string): string => {
   return macAddress.replace(/[:-]/g, "").toLowerCase();
 };
@@ -129,6 +171,11 @@ export const normalizeMacAddress = (macAddress: string): string => {
  * isValidMacAddress - return true if it's a valid MAC address
  * @param macAddress
  * @returns
+ */
+/**
+ * const isValidMacAddress = — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const isValidMacAddress = (macAddress: string): boolean => {
   const cleanedMacAddress = normalizeMacAddress(macAddress);
@@ -146,6 +193,11 @@ export const isValidMacAddress = (macAddress: string): boolean => {
  * @param result - JSON object of the iperf test results
  * @param isUdp - flag whether it's a TCP or UDP test
  * @returns IperfTestProperty
+ */
+/**
+ * function extractIperfResults — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function extractIperfResults(
   result: {
@@ -228,6 +280,11 @@ export function extractIperfResults(
  * @returns
  */
 // sort by the signalStrength value (may be null)
+/**
+ * function bySignalStrength — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function bySignalStrength(a: any, b: any): number {
   const signalA = a.signalStrength;
   const signalB = b.signalStrength;
@@ -247,6 +304,11 @@ export function bySignalStrength(a: any, b: any): number {
  * Remove '"' from returned value
  * @param line - a "label" separated by a ":" followed by a value
  * @returns array of strings: [label, key, value] may be ["", "",""] if no ":"
+ */
+/**
+ * function splitLine — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export function splitLine(line: string, localizer: LocalizerMap): string[] {
   const pos = line.indexOf(":");
@@ -274,6 +336,11 @@ export function splitLine(line: string, localizer: LocalizerMap): string[] {
  * @param channel
  * @returns 2.4 or 5 (as number)
  */
+/**
+ * function channelToBand — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function channelToBand(channel: number): number {
   return channel <= 14 ? 2.4 : 5;
 }
@@ -287,6 +354,11 @@ export const emptyIperfTestProperty: IperfTestProperty = {
   signalStrength: 0,
 };
 
+/**
+ * function getDefaultIperfResults — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export function getDefaultIperfResults(): IperfResults {
   return {
     tcpDownload: emptyIperfTestProperty,

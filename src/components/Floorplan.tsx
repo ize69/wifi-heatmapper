@@ -1,5 +1,13 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/Floorplan.tsx
+ * Purpose: Interactive floorplan UI: draw points, start measurements, and show popups.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 import React, { ReactNode, useRef, useState } from "react";
 import { useEffect } from "react";
+
 import {
   getDefaultWifiResults,
   getDefaultIperfResults,
@@ -17,14 +25,40 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getLogger } from "../lib/logger";
 const logger = getLogger("Floorplan");
 
+/**
+ * ClickableFloorplan
+ * Renders the floorplan, draws existing survey points and handles user
+ * interactions: clicking to view point details or to start a new measurement.
+ */
+/**
+ * default function ClickableFloorplan — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export default function ClickableFloorplan(): ReactNode {
   const { settings, updateSettings, surveyPointActions } = useSettings();
+
+  // Helper: get floors list (backwards compatible with single floor fields)
+  const getFloors = () => {
+    if (settings.floorplans && settings.floorplans.length > 0) return settings.floorplans;
+    return [
+      {
+        name: settings.floorplanImageName || "",
+        path: settings.floorplanImagePath || "",
+        z: 0,
+      },
+    ];
+  };
+
+  const floors = getFloors().slice().sort((a, b) => (a.z || 0) - (b.z || 0));
+  const activeZ = settings.currentFloorZ ?? 0;
+  const activeFloor = floors.find((f) => (f.z ?? 0) === activeZ) || floors[0];
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedPoint, setSelectedPoint] = useState<SurveyPoint | null>(null);
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   // const [dimensions, setDimensions] = useState(settings.dimensions);
   const [scale, setScale] = useState(1);
@@ -57,9 +91,13 @@ export default function ClickableFloorplan(): ReactNode {
    * Load the image (and the canvas) when the component is mounted
    */
   useEffect(() => {
-    if (settings.floorplanImagePath != "") {
+    const pathToLoad = activeFloor?.path || "";
+    // Reset state so we correctly reload when floor changes
+    setImageLoaded(false);
+    imageRef.current = null;
+    if (pathToLoad != "") {
       const img = new Image();
-      img.src = settings.floorplanImagePath; // load the image from the path
+      img.src = pathToLoad; // load the image from the path
 
       img.onload = () => {
         const newDimensions = { width: img.width, height: img.height };
@@ -71,7 +109,7 @@ export default function ClickableFloorplan(): ReactNode {
         console.log(`image error`);
       };
     }
-  }, []);
+  }, [activeFloor?.path, settings.currentFloorZ]);
 
   /**
    * addTestPoint() - add a test point
@@ -93,6 +131,7 @@ export default function ClickableFloorplan(): ReactNode {
       iperfData,
       x: 0,
       y,
+      floorZ: settings.currentFloorZ ?? 0,
       timestamp: Date.now(),
       id: "bad ID",
       isEnabled: true,
@@ -111,7 +150,7 @@ export default function ClickableFloorplan(): ReactNode {
       canvas.style.height = "auto";
       drawCanvas();
     }
-  }, [imageLoaded, settings.dimensions, settings.surveyPoints]);
+  }, [imageLoaded, settings.dimensions, settings.surveyPoints, settings.currentFloorZ]);
 
   const handleToastIsReady = (): void => {
     measureSurveyPoint(surveyClick);
@@ -185,9 +224,10 @@ export default function ClickableFloorplan(): ReactNode {
     // Got measurements: add the x/y point, point number, and enabled
     const newPoint = {
       wifiData,
-      iperfData,
+      iperfData: iperfData!,
       x,
       y,
+      floorZ: settings.currentFloorZ ?? 0,
       timestamp: Date.now(),
       isEnabled: true,
       id: `Point_${settings.nextPointNum}`,
@@ -242,8 +282,9 @@ export default function ClickableFloorplan(): ReactNode {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // draw the image "behind" everything else
         ctx.drawImage(imageRef.current, 0, 0);
-        // draw the points on top
-        drawPoints(settings.surveyPoints, ctx);
+        // draw only the points for the active floor on top
+        const pointsForFloor = settings.surveyPoints.filter((p) => (p.floorZ ?? 0) === (activeFloor?.z ?? 0));
+        drawPoints(pointsForFloor, ctx);
       }
     }
   };
@@ -252,8 +293,11 @@ export default function ClickableFloorplan(): ReactNode {
    * Close the popup window by setting selectedPoint to null
    */
   const closePopup = (): void => {
-    setSelectedPoint(null);
+    setSelectedPointId(null);
   };
+  //check if there is a provided floor plan
+  const isEmptyFloorplan =
+  settings.floorplanImagePath?.endsWith("EmptyFloorPlan.png");
   /**
    * drawPoints - draw the list of points in the specified context
    * @param ctx
@@ -322,7 +366,9 @@ export default function ClickableFloorplan(): ReactNode {
     ctx.shadowOffsetY = SHADOW_OFF;
 
     // Label box
-    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.fillStyle = isEmptyFloorplan
+    ? "rgba(17, 24, 39, 0.75)"   // dark glass for empty plan
+    : "rgba(255, 255, 255, 0.6)"; // near bg-card
     ctx.fillRect(
       point.x - boxWidth / 2,
       point.y + LABEL_OFFSET_Y,
@@ -337,7 +383,10 @@ export default function ClickableFloorplan(): ReactNode {
     ctx.shadowOffsetY = 0;
 
     // Text
-    ctx.fillStyle = "#1F2937";
+    ctx.fillStyle = isEmptyFloorplan 
+    ? "#F9FAFB" 
+    : "#1F2937";
+    
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     lines.forEach((line, i) => {
@@ -367,7 +416,7 @@ export default function ClickableFloorplan(): ReactNode {
 
     ctx.beginPath();
     ctx.arc(point.x, point.y, R, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "rgba(55, 65, 81, 0.9)"; // muted dark gray
     ctx.fill();
     ctx.strokeStyle = "grey";
     ctx.lineWidth = BORDER;
@@ -391,8 +440,8 @@ export default function ClickableFloorplan(): ReactNode {
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     // if a point was selected, they have "clicked away"
     // also closes PopupDetails by clicking away
-    if (selectedPoint) {
-      setSelectedPoint(null);
+    if (selectedPointId) {
+      setSelectedPointId(null);
       return;
     }
 
@@ -406,15 +455,15 @@ export default function ClickableFloorplan(): ReactNode {
     setSurveyClick({ x: x, y: y }); // retain the X/Y of the clicked point
 
     // Find closest surveyPoint (within 20 units?)
-    const clickedPoint = settings.surveyPoints.find(
-      (point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) < 20,
-    );
+    const clickedPoint = settings.surveyPoints
+      .filter((p) => (p.floorZ ?? 0) === (activeFloor?.z ?? 0))
+      .find((point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) < 20);
 
     // if they clicked an existing point, set the selected point
     // and display the PopupDetails
     // (not sure what all this machinery does - why not just setSelectedPoint(clickedPoint)?)
     if (clickedPoint) {
-      setSelectedPoint(selectedPoint == clickedPoint ? null : clickedPoint);
+      setSelectedPointId(selectedPointId == clickedPoint.id ? null : clickedPoint.id);
       setPopupPosition({
         x: clickedPoint.x * scale,
         y: clickedPoint.y * scale,
@@ -424,14 +473,25 @@ export default function ClickableFloorplan(): ReactNode {
       drawEmptyPoint({ x, y } as SurveyPoint, canvas.getContext("2d")!, {
         bgW: canvas!.width,
       });
-      setSelectedPoint(null);
+      setSelectedPointId(null);
       setAlertMessage("");
       setIsToastOpen(true);
     }
   };
 
+  // Cycle floors: update settings.currentFloorZ
+  const cycleFloor = (dir: 1 | -1) => {
+    if (floors.length <= 1) return;
+    const idx = floors.findIndex((f) => (f.z ?? 0) === (activeFloor?.z ?? 0));
+    const next = (idx + dir + floors.length) % floors.length;
+    const nextZ = floors[next].z ?? 0;
+    updateSettings({ currentFloorZ: nextZ });
+    // also update floorplanImageName/path for backward compatibility
+    updateSettings({ floorplanImageName: floors[next].name, floorplanImagePath: floors[next].path });
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-gray-800">
         Interactive Floorplan
       </h2>
@@ -460,6 +520,7 @@ export default function ClickableFloorplan(): ReactNode {
           className="border border-gray-300 rounded-lg cursor-pointer"
         />
 
+        
         <div
           style={{
             position: "absolute",
@@ -469,7 +530,7 @@ export default function ClickableFloorplan(): ReactNode {
           }}
         >
           <PopupDetails
-            point={selectedPoint}
+            point={settings.surveyPoints.find((p) => p.id === selectedPointId) || null}
             settings={settings}
             surveyPointActions={surveyPointActions}
             onClose={closePopup}
@@ -483,14 +544,6 @@ export default function ClickableFloorplan(): ReactNode {
             toastIsReady={handleToastIsReady}
           />
         )}
-        {/* COMMENT THIS BUTTON OUT FOR PRODUCTION */}
-        <button
-          className="mt-2 px-2 py-1 bg-blue-500 text-white rounded"
-          onClick={startTestPoints}
-          disabled={idx !== null}
-        >
-          Add test points...
-        </button>
       </div>
     </div>
   );

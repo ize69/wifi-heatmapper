@@ -1,3 +1,10 @@
+/*
+ * wifi-heatmapper
+ * File: src/components/MediaDropdown.tsx
+ * React component for the UI.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -20,6 +27,11 @@ type MediaDropdownProps = {
  * @returns
  */
 
+/**
+ * default function MediaDropdown — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
+ */
 export default function MediaDropdown({
   defaultValue,
   onChange,

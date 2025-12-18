@@ -1,6 +1,18 @@
+/*
+ * wifi-heatmapper
+ * File: src/app/webGL/shaders/fullscreenQuadVertexShader.ts
+ * WebGL renderer or shader used for heatmap rendering.
+ * Generated: 2025-12-18T10:28:20.555Z
+ */
+
 /**
  * Generic vertex shader for rendering a full-screen quad.
  * Converts normalized device coordinates [-1, 1] to UV coordinates [0, 1].
+ */
+/**
+ * const fullscreenQuadVertexShader = ` — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const fullscreenQuadVertexShader = `
   attribute vec2 a_position;
@@ -16,6 +28,11 @@ export const fullscreenQuadVertexShader = `
  * Useful when working with texture coordinate systems that use a top-left origin.
  *
  * TODO: Merge using a `uniform bool u_flipY` toggle to reduce duplication.
+ */
+/**
+ * const fullscreenQuadVertexShaderFlipY = ` — exported symbol.
+ *
+ * TODO: replace this generic description with a concise comment.
  */
 export const fullscreenQuadVertexShaderFlipY = `
   attribute vec2 a_position;
